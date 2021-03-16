@@ -2,22 +2,15 @@
   "name": "ptu",
   "title": "Pokemon Tabletop United",
   "description": "A Pen and Paper Roleplaying Game Set in the World of Pokemon",
-  "version": "1.2.0",
+  "version": "1.2.7",
   "minimumCoreVersion": "0.6.5",
   "compatibleCoreVersion": "0.7.9",
   "templateVersion": 2,
   "author": "Dylan Piera, Tymo Wessel, Jeffrey Hollander, Efren A. Mariño & Cody Swendrowski",
   "esmodules": ["module/ptu.js"],
   "socket": true,
-  "styles": [
-    "css/ptu.css",
-    "css/main.css",
-    "import/jquery-ui.css"
-  ],
-  "scripts": [
-    "import/jquery-ui.js",
-    "css/bootstrap.js"
-  ],
+  "styles": ["css/ptu.css", "css/main.css", "import/jquery-ui.css"],
+  "scripts": ["import/jquery-ui.js", "css/bootstrap.js"],
   "packs": [
     {
       "label": "abilities",
@@ -94,10 +87,10 @@
   "gridUnits": "m",
   "primaryTokenAttribute": "health",
   "secondaryTokenAttribute": "exp",
-  "url": "https://github.com/dylanpiera/Foundry-Pokemon-Tabletop-United-System",
-  "manifest": "https://github.com/dylanpiera/Foundry-Pokemon-Tabletop-United-System/releases/latest/download/system.json",
-  "changelog": "https://github.com/dylanpiera/Foundry-Pokemon-Tabletop-United-System/raw/master/changelog.md",
-  "download": "https://github.com/dylanpiera/Foundry-Pokemon-Tabletop-United-System/releases/latest/download/system.zip",
+  "url": "https://github.com/cgm343/PTU-FVTT",
+  "manifest": "https://github.com/cgm343/PTU-FVTT/releases/latest/download/system.json",
+  "changelog": "https://github.com/cgm343/PTU-FVTT/raw/master/changelog.md",
+  "download": "https://github.com/cgm343/PTU-FVTT/releases/latest/download/system.zip",
   "initiative": "",
   "license": "LICENSE.txt"
 }
