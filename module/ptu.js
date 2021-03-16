@@ -92,7 +92,7 @@ Hooks.once('init', async function() {
    * @type {String}
    */
   CONFIG.Combat.initiative = {
-    formula: "@initiative.value + (1d20 * 0.01)",
+    formula: "@initiative.value + (1d20) + (1d20 * 0.01)",
     decimals: 2
   };
 
@@ -144,7 +144,7 @@ Hooks.once('init', async function() {
     if(name || 0 !== name.length) {
       let item = game.ptu.items.find(i => i.name.toLowerCase().includes(name.toLowerCase()));
       if(item) return item.data.data.effect;
-    }  
+    }
     return "";
   });
   Handlebars.registerHelper("getGameSetting", function(key) { return game.settings.get("ptu",key)});
@@ -229,18 +229,18 @@ function _calcMoveDb(move, bool = false) {
   if(move.category === "Status") return;
   let bonus = move.owner ? move.category === "Physical" ? move.owner.stats.atk.total : move.owner.stats.spatk.total : 0;
   if(move.damageBase.toString().match(/^[0-9]+$/) != null) {
-    let db = game.ptu.DbData[move.stab ? parseInt(move.damageBase) + 2 : move.damageBase];  
+    let db = game.ptu.DbData[move.stab ? parseInt(move.damageBase) + 2 : move.damageBase];
     if(db) return db + (bool ? " + " : "#") + bonus;
     return -1;
   }
-  let db = game.ptu.DbData[move.damageBase];  
+  let db = game.ptu.DbData[move.damageBase];
   if(db) return db;
   return -1;
 }
 
 export function PrepareMoveData(actorData, move) {
   if(!actorData || move.prepared) return move;
-  move.owner = { 
+  move.owner = {
     type: actorData.typing,
     stats: actorData.stats,
     acBonus: actorData.modifiers.acBonus,
@@ -249,7 +249,7 @@ export function PrepareMoveData(actorData, move) {
   move.prepared = true;
 
   move.stab = move.owner?.type && (move.owner.type[0] == move.type || move.owner.type[1] == move.type);
-  move.acBonus = move.owner.acBonus ? move.owner.acBonus : 0; 
+  move.acBonus = move.owner.acBonus ? move.owner.acBonus : 0;
   return move;
 }
 
@@ -440,7 +440,7 @@ function _loadSystemSettings() {
     default: "pokemon_sounds/",
     onChange: (value) => CustomSpeciesFolder.updateFolderDisplay(value)
   });
-} 
+}
 
 /* -------------------------------------------- */
 /*  Custom Species (Editor) Hooks               */
@@ -489,7 +489,7 @@ Hooks.on("renderSettingsConfig", function() {
     </div>
   </div>`
 
-  $('#open-custom-species-editor').click(function() { 
+  $('#open-custom-species-editor').click(function() {
     new game.ptu.PTUCustomSpeciesEditor().render(true);
   })
 });
@@ -510,8 +510,8 @@ Hooks.once("ready", async function() {
   Hooks.on("hotbarDrop", (bar, data, slot) => createPTUMacro(data, slot));
 
   game.socket.on("system.ptu", (data) => {
-    if(data == null) return; 
-    if(data == "RefreshCustomSpecies" || (data == "ReloadGMSpecies" && game.user.isGM)) Hooks.callAll("updatedCustomSpecies"); 
+    if(data == null) return;
+    if(data == "RefreshCustomSpecies" || (data == "ReloadGMSpecies" && game.user.isGM)) Hooks.callAll("updatedCustomSpecies");
   });
 
   /** Display Changelog */
@@ -536,7 +536,7 @@ Hooks.once("ready", async function() {
     scriptTag.src = filePath + cacheBuster;
 
     // Finally add it to the <head>
-    document.getElementsByTagName("head")[0].appendChild(scriptTag);  
+    document.getElementsByTagName("head")[0].appendChild(scriptTag);
   }
 });
 
@@ -622,7 +622,7 @@ function setAccessabilityFont(enabled) {
   }
 }
 
-export async function PlayPokemonCry(species) 
+export async function PlayPokemonCry(species)
 {
     if(game.settings.get("ptu", "playPokemonCriesOnDrop"))
     {
@@ -630,17 +630,17 @@ export async function PlayPokemonCry(species)
         let SpeciesCryFilename = species.toString().toLowerCase();
 
         const response_mp3 = await fetch(CryDirectory+SpeciesCryFilename+".mp3");
-        if (response_mp3.status >= 200 && response_mp3.status <= 299) 
+        if (response_mp3.status >= 200 && response_mp3.status <= 299)
         {
             AudioHelper.play({src: CryDirectory+SpeciesCryFilename+".mp3", volume: 0.8, autoplay: true, loop: false}, true);
-        } 
-        else 
+        }
+        else
         {
             const response_wav = await fetch(CryDirectory+SpeciesCryFilename+".wav");
-            if (response_wav.status >= 200 && response_wav.status <= 299) 
+            if (response_wav.status >= 200 && response_wav.status <= 299)
             {
                 AudioHelper.play({src: CryDirectory+SpeciesCryFilename+".wav", volume: 0.8, autoplay: true, loop: false}, true);
-            } 
+            }
         }
     }
 }
