@@ -167,10 +167,25 @@ export class PTUGen4PokemonSheet extends ActorSheet {
 		if (dataset.roll) {
 			let roll = new Roll(dataset.roll, this.actor.data.data);
 			let label = dataset.label ? `Rolling ${dataset.label}` : '';
-			roll.roll().toMessage({
-				speaker: ChatMessage.getSpeaker({ actor: this.actor }),
+			roll = roll.roll()
+			console.dir(roll)
+			roll.toMessage({
+				speaker: ChatMessage.getSpeaker({
+					actor: this.actor
+				}),
 				flavor: label
 			});
+
+			const die = roll.results[0];
+			if (die === 20 || die === 1) {
+			    roll.toMessage({
+				speaker: ChatMessage.getSpeaker({
+					actor: this.actor
+				}),
+				flavor: label,
+				content: (die === 20) ? "<h1>Critical Success!</h1>" : "<h1>Critical Fail!</h1>"
+			});
+			}
 		}
 	}
 

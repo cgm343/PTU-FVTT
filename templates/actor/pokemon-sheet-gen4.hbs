@@ -150,7 +150,7 @@
                   <ol class="item-list">
                     {{#each actor.moves as | move |}}
                     <li class="item flexrow" data-item-id="{{move._id}}">
-                      <div class="itemInline rollable" data-critrange="{{calcCritRange ../data}}" data-roll="{{calcMoveDb ../data move.data false}}" data-label="{{move.name}}" data-ac="{{calcAc move.data}}" data-type="{{move.data.category}}"> 
+                      <div class="itemInline rollable" data-critrange="{{calcCritRange ../data}}" data-roll="{{calcMoveDb ../data move.data false}}" data-label="{{move.name}}" data-ac="{{calcAc move.data}}" data-type="{{move.data.category}}">
                         <i class="fas fa-dice-d20" style="position:unset;"></i>
                       </div>
                       <div class="item-name flexrow">
@@ -485,9 +485,9 @@
                   </div>
                 </div>
               </div>
-              
+
               <!-- Skill Background -->
-              
+
               <!-- Species + Gender -->
               <div class="hgss-box mb-2 w-100" style="text-align: center; word-break: keep-all;">
                 <div class="hgss-header">
@@ -560,11 +560,11 @@
                           data-dtype="Number" disabled/>
                       </div>
                       <div class="skill {{key}} col-sm-2 align-self-center bgcolor fs-9 center-text rollable"
-                        data-roll="{{skill.value}}d6{{#if skill.modifier}}+{{skill.modifier}}{{/if}}"
+                        data-roll="1d20{{#if skill.modifier}}+{{skill.modifier}}{{/if}}+{{skill.value}}*3"
                         data-label="{{skill.label}}">
                         <i class="fas fa-dice-d20"></i>
                         <label for="data.skills.{{key}}.value"
-                          class="resource-label">{{skill.value}}d6{{#if skill.modifier}}+{{skill.modifier}}{{/if}}</label>
+                          class="resource-label">1d20{{#if skill.modifier}}+{{skill.modifier}}{{/if}}+{{skill.value}}*3</label>
                       </div>
                     </div>
                     {{/each}}

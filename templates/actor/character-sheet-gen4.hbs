@@ -117,14 +117,14 @@
                             />
                         </div>
                         <div class="skill {{key}} col-sm-2 align-self-center bgcolor fs-9 center-text rollable"
-                          data-roll="{{skill.value}}d6{{#if skill.modifier}}+{{skill.modifier}}{{/if}}"
+                          data-roll="1d20{{#if skill.modifier}}+{{skill.modifier}}{{/if}}+{{skill.value}}*3"
                             data-label="{{skill.label}}"
                         >
                           <i class="fas fa-dice-d20"></i>
-                          <label 
-                            for="data.skills.{{key}}.value" 
-                            class="resource-label" 
-                            >{{skill.value}}d6{{#if skill.modifier}}+{{skill.modifier}}{{/if}}</label>
+                          <label
+                            for="data.skills.{{key}}.value"
+                            class="resource-label"
+                            >1d20{{#if skill.modifier}}+{{skill.modifier}}{{/if}}+{{skill.value}}*3</label>
                         </div>
                       </div>
                       {{/each}}

@@ -235,12 +235,25 @@ export class PTUGen8PokemonSheet extends ActorSheet {
 		if (dataset.roll) {
 			let roll = new Roll(dataset.roll, this.actor.data.data);
 			let label = dataset.label ? `Rolling ${dataset.label}` : '';
-			roll.roll().toMessage({
+			roll = roll.roll()
+			console.dir(roll)
+			roll.toMessage({
 				speaker: ChatMessage.getSpeaker({
 					actor: this.actor
 				}),
 				flavor: label
 			});
+
+			const die = roll.results[0];
+			if (die === 20 || die === 1) {
+			    roll.toMessage({
+				speaker: ChatMessage.getSpeaker({
+					actor: this.actor
+				}),
+				flavor: label,
+				content: (die === 20) ? "<h1>Critical Success!</h1>" : "<h1>Critical Fail!</h1>"
+			});
+			}
 		}
 	}
 
@@ -388,7 +401,7 @@ export class PTUGen8PokemonSheet extends ActorSheet {
 		}
 		d.position.width = 650;
 		d.position.height = 125;
-		
+
 		d.render(true);
 	}
 }
@@ -465,7 +478,7 @@ async function sendMoveRollMessage(rollData, messageData = {}) {
 		error("Can't display move chat message without move data.")
 		return;
 	}
-	
+
 	if(!Hooks.call("ptu.preSendMoveToChat", messageData)) return;
 
 	messageData.content = await renderTemplate(`/systems/ptu/templates/chat/moves/move-${messageData.templateType}.hbs`, messageData)
@@ -488,7 +501,7 @@ export async function sendMoveMessage(messageData = {}) {
 	}
 
 	if(!Hooks.call("ptu.preSendMoveToChat", messageData)) return;
-	
+
 	messageData.content = await renderTemplate(`/systems/ptu/templates/chat/moves/move-${messageData.templateType}.hbs`, messageData)
 
 	Hooks.call("ptu.SendMoveToChat", duplicate(messageData));
@@ -510,12 +523,12 @@ const CritOptions = {
 }
 
 Hooks.on("ptu.preSendMoveToChat", function(messageData) {
-    debug("Calling ptu.preSendMoveToChat hook with args:"); 
+    debug("Calling ptu.preSendMoveToChat hook with args:");
 	debug(messageData);
 	return true;
 })
 Hooks.on("ptu.SendMoveToChat", function(messageData) {
-    debug("Calling ptu.SendMoveToChat hook with args:"); 
+    debug("Calling ptu.SendMoveToChat hook with args:");
 	debug(messageData);
 	return true;
 })
