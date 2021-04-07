@@ -770,7 +770,7 @@ Hooks.on("updateInitiative", function(actor) {
 
   let c = game.combats.active.combatants.find(x => x.actor?._id == actor._id)
   if(!c) return;
-  console.log(actor);
+  console.log(c);
   let init = actor.data.data.initiative.value;
   let tieBreaker = Number((c.initiative+"").split(".")[1]) * 0.01;
   if(init+tieBreaker != c.initiative) {
