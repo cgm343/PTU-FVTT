@@ -88,9 +88,9 @@
   "primaryTokenAttribute": "health",
   "secondaryTokenAttribute": "exp",
   "url": "https://github.com/cgm343/PTU-FVTT",
-  "manifest": "https://github.com/cgm343/PTU-FVTT/releases/latest/download/system.json",
+  "manifest": "https://github.com/cgm343/PTU-FVTT/raw/master/system.json",
   "changelog": "https://github.com/cgm343/PTU-FVTT/raw/master/changelog.md",
-  "download": "https://github.com/cgm343/PTU-FVTT/releases/latest/download/system.zip",
+  "download": "https://github.com/cgm343/PTU-FVTT/archive/system.zip",
   "initiative": "",
   "license": "LICENSE.txt"
 }

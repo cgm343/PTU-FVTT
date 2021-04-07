@@ -770,11 +770,11 @@ Hooks.on("updateInitiative", function(actor) {
 
   let c = game.combats.active.combatants.find(x => x.actor?._id == actor._id)
   if(!c) return;
+  console.log(actor);
   let init = actor.data.data.initiative.value;
-  let random = Math.floor(Math.random() * 20) + 1
   let tieBreaker = Number((c.initiative+"").split(".")[1]) * 0.01;
-  if(init+tieBreaker+random != c.initiative) {
-    game.combats.active.setInitiative(c._id, init >= 0 ? init+tieBreaker+random : (Math.abs(init)+tieBreaker+random)*-1);
+  if(init+tieBreaker != c.initiative) {
+    game.combats.active.setInitiative(c._id, init >= 0 ? init+tieBreaker : (Math.abs(init)+tieBreaker)*-1);
   }
 
   return true;

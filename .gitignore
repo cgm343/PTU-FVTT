@@ -1,6 +1,8 @@
 # IDE
 .idea/
 .vs/
+.github/
+.vscode/
 
 # Node Modules
 node_modules/
