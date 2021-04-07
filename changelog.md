@@ -3,8 +3,66 @@
 - Added a 'Deal Damage' button to Attack Chat Messages, which applies the damage of that move to all selected tokens.
   - Also added an Undo button for the applied damage.
 
-### Pokemon Generation
-- **Big Change!** DM Quick-Pokemon Generation
+## 1.2.10 - Status Affliction Api Update
+- Added extra data to Status Affliction for Developer use.
+
+## 1.2.9 - Hotfix Save Checks
+- No longer roll save checks when pressing enter / return
+- Item placeholder is updated to better reflect the system
+
+## 1.2.8 - Status Effects!
+- Added Status Afflictions to the system as token effects
+- Some effects have automated effects, for more info see the following list:
+> **Burn**: -2 def cs
+> **Frozen:** become vulnerable
+> **Paralysis:** half init
+> **Poison:** -2 spdef cs*
+> **Flinch:** Apply stacking -5 initiative penalty (reapply flinch to token to increase flinch stacks), become vulnerable, flinch stacks reset when combat ends.
+> **Sleep:** become vulnerable
+> **Faint:** become vulnerable
+> **Blind:** become vulnerable, -6 accuracy
+> **Total Blind:** become blind, -4 accuracy (ergo total of -10)
+> **Slowed:** half movement
+> **Stuck:** speed evasion = 0
+> **Tripped:** become vulnerable
+> **Vulnerable:** evasion = 0
+- Fixed the requirement to close a character sheet for owner field to update
+- Added a debug tab to sheets that show active effects and their modifiers.
+  - This is currently purely a view, but will later be expended to allow manual editing of custom effects
+
+## 1.2.7 - Bonus Fields
+- Re-added 'imgpath' param to `/ptug` command.
+- Owner field now also works for GM pokemon.
+- Re-remvoed 'The Furnace' dependency :|
+- Added field for Effect Range bonus.
+- Added GM Only loyalty field.
+
+## 1.2.6 - Fixed Img Generator
+- Generated Img Path now use a relative path instead of absolute.
+
+## 1.2.4 - 1.2.5 - Training, Save Checks & Temp HP Bar
+- Automatically modify initiative of actors in Combat when their initative modifier or speed stat changes.
+- Added Training options to the Combat Tab that automatically add (invisible) modifiers where necessary
+- Add Save Checks to Combat Tab
+- Made Temp HP bar available as Token Bar
+
+- **API BREAKING**: `data.health.temp` has now moved to `data.tempHp`
+
+## 1.2.3 - Mon Generator Update
+- Changed the Generator to batch apply, saving on a lot of database calls.
+- Dex Drag & Drop now centers to the square the mon is dropped into.
+
+***Note:*** This update is also testing to see if the 'Mysterious Disappearance' glitch that can occur when generating pokemon. Being that after a refresh sometimes Items (like moves, abilities etc.) or other Data is missing from the actor.
+As well as players being unable to edit the mon when granted permission without refreshing their browser.
+
+## 1.2.2 - Bugfix
+- Fixed Custom Species Art not taking priority over regular art when selected by ID
+- Fixed Custom Moves, Abilities & Capabilities not being loaded when they are turned on for Character Generation.
+
+## 1.2.1 - Version 1.2 Release - Beta Branch
+
+## 1.1.12 - Bugfix
+- Fixed Command showing even when command is properly handled.
 
 DMs can now quickly generate Pokémon for random encounters using the chat! For more info see the [wiki](https://github.com/dylanpiera/Foundry-Pokemon-Tabletop-United-System/wiki/Pokemon-Generation-using-Chat-Commands).
 - This also works by Dragging & Dropping dex entries right into the battle field! Creating tokens where needed.
@@ -66,7 +124,7 @@ DMs can now quickly generate Pokémon for random encounters using the chat! For 
 - Added automated release cycle
   - There is a beta branch available, for more info see [README.md](https://github.com/dylanpiera/Foundry-Pokemon-Tabletop-United-System/blob/master/README.md)
 - Added in-foundry copy of this very Changelog!
-- Reworked README.md to better reflect our V1 release! 
+- Reworked README.md to better reflect our V1 release!
 
 ## 0.0.50 - Scrollable Move Effects
 - Move effects may now show up with scrollbars if their effect text is deemed too long.

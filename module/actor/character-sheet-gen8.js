@@ -139,6 +139,7 @@ export class PTUGen8CharacterSheet extends ActorSheet {
 		// Rollable abilities.
 		html.find('.rollable.skill').click(this._onRoll.bind(this));
 		html.find('.rollable.gen8move').click(this._onMoveRoll.bind(this));
+		html.find('.rollable.save').click(this._onSaveRoll.bind(this));
 
 		// Drag events for macros.
 		if (this.actor.owner) {
@@ -242,6 +243,26 @@ export class PTUGen8CharacterSheet extends ActorSheet {
 	}
 
 	/**
+	 * Handle clickable rolls.
+	 * @param {Event} event   The originating click event
+	 * @private
+	 */
+	_onSaveRoll(event) {
+		event.preventDefault();
+		if(event.screenX == 0 && event.screenY == 0) return;
+		
+		let mod = this.actor.data.data.modifiers.saveChecks ?? 0;
+		let roll = new Roll("1d20 + @mod", {mod: mod});
+		let label = 'Rolling Save Check';
+		roll.roll().toMessage({
+			speaker: ChatMessage.getSpeaker({
+				actor: this.actor
+			}),
+			flavor: label
+		});
+	}
+
+	/**
 	 * Handle clickable move rolls.
 	 * @param {Event} event   The originating click event
 	 * @private
@@ -256,7 +277,7 @@ export class PTUGen8CharacterSheet extends ActorSheet {
 
 		/** Option Callbacks */
 		let PerformFullAttack = () => {
-			let acRoll = CalculateAcRoll(move.data, this.actor.data.data);
+			let acRoll = CalculateAcRoll(move.data, this.actor.data);
 			let diceResult = GetDiceResult(acRoll)
 
 			let crit = diceResult === 1 ? CritOptions.CRIT_MISS : diceResult >= 20 - this.actor.data.data.modifiers.critRange ? CritOptions.CRIT_HIT : CritOptions.NORMAL;
@@ -374,10 +395,10 @@ export class PTUGen8CharacterSheet extends ActorSheet {
 
 /** Pure Functions */
 
-function CalculateAcRoll(moveData, actorData) {
+function CalculateAcRoll(moveData, actor) {
 	return new Roll('1d20-@ac+@acBonus', {
 		ac: (parseInt(moveData.ac) || 0),
-		acBonus: (parseInt(actorData.modifiers.acBonus) || 0)
+		acBonus: (actor.flags?.ptu?.is_blind ? actor.flags?.ptu?.is_totally_blind ? -10 : -6 : 0) + (parseInt(actor.data.modifiers.acBonus) || 0)
 	})
 }
 

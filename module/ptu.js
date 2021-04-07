@@ -35,13 +35,16 @@ import { ApplyEvolution } from './utils/calculate-evolution.js'
 import { GiveCapabilities } from './utils/capability-generator.js'
 import { DistributeStatsWeighted, DistributeStatsRandomly, DistributeByBaseStats, BaseStatsWithNature, ApplyLevelUpPoints } from './utils/calculate-stat-distribution.js'
 import { GetOrCreateCachedItem } from './utils/cache-helper.js'
+import { ActorGenerator } from './utils/actor-generator.js'
+import { GetOrCacheAbilities, GetOrCacheCapabilities, GetOrCacheMoves} from './utils/cache-helper.js'
+import {Afflictions} from './combat/effects/afflictions.js'
 
 export let debug = (...args) => {if (game.settings.get("ptu", "showDebugInfo") ?? false) console.log("DEBUG: FVTT PTU | ", ...args)};
 export let log = (...args) => console.log("FVTT PTU | ", ...args);
 export let warn = (...args) => console.warn("FVTT PTU | ", ...args);
 export let error = (...args) => console.error("FVTT PTU | ", ...args)
 
-export const LATEST_VERSION = "1.2.0";
+export const LATEST_VERSION = "1.2.10";
 
 Hooks.once('init', async function() {
 
@@ -64,6 +67,7 @@ Hooks.once('init', async function() {
     PlayPokemonCry,
     FinishDexDragPokemonCreation,
     monGenerator: {
+      ActorGenerator,
       CreateMonParser,
       GetRandomNature,
       GiveRandomAbilities,
@@ -114,6 +118,10 @@ Hooks.once('init', async function() {
   // If you need to add Handlebars helpers, here are a few useful examples:
   let itemDisplayTemplate = await (await fetch('/systems/ptu/templates/partials/item-display-partial.hbs')).text()
   Handlebars.registerPartial('item-display', itemDisplayTemplate);
+
+  fetch('/systems/ptu/templates/partials/active-effects.hbs').then(r => r.text().then(template => {
+    Handlebars.registerPartial('active-effects', template);
+  }))
 
   Handlebars.registerHelper("concat", function() {
     var outStr = '';
@@ -201,6 +209,10 @@ Hooks.once('init', async function() {
     return `<img src="/systems/ptu/css/images/types/${type}IC.webp">`;
   });
 
+  Handlebars.registerHelper("isGm", function () {
+    return game.user.isGM;
+  })
+
   /** If furnace ain't installed... */
   if(!Object.keys(Handlebars.helpers).includes("divide")) {
     warn("It is recommended to install & enable 'The Furnace' module.")
@@ -208,6 +220,7 @@ Hooks.once('init', async function() {
     Handlebars.registerHelper("divide", (value1, value2) => Number(value1) / Number(value2));
     Handlebars.registerHelper("multiply", (value1, value2) => Number(value1) * Number(value2));
     Handlebars.registerHelper("floor", (value) => Math.floor(Number(value)));
+    Handlebars.registerHelper("capitalizeFirst", (e) => {return"string"!=typeof e?e:e.charAt(0).toUpperCase()+e.slice(1)});
   }
 
   // Load System Settings
@@ -538,6 +551,10 @@ Hooks.once("ready", async function() {
     // Finally add it to the <head>
     document.getElementsByTagName("head")[0].appendChild(scriptTag);
   }
+
+  /** Combat Initialization */
+  CONFIG.statusEffects = Afflictions;
+  CONFIG.Combat.defeatedStatusId = Afflictions[0].id;
 });
 
 /* -------------------------------------------- */
@@ -746,6 +763,22 @@ class DirectoryPicker extends FilePicker {
     $(html).find("footer button").text("Select Directory");
   }
 }
+
+// Automatically update Initiative if Speed / Init Mod changes
+Hooks.on("updateInitiative", function(actor) {
+  if(!game.combats?.active) return;
+
+  let c = game.combats.active.combatants.find(x => x.actor?._id == actor._id)
+  if(!c) return;
+  let init = actor.data.data.initiative.value;
+  let random = Math.floor(Math.random() * 20) + 1
+  let tieBreaker = Number((c.initiative+"").split(".")[1]) * 0.01;
+  if(init+tieBreaker+random != c.initiative) {
+    game.combats.active.setInitiative(c._id, init >= 0 ? init+tieBreaker+random : (Math.abs(init)+tieBreaker+random)*-1);
+  }
+
+  return true;
+})
 
 // this s hooked in, we don't use all the data, so lets stop eslint complaining
 // eslint-disable-next-line no-unused-vars

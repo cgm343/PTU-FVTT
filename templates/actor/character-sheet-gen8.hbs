@@ -203,9 +203,9 @@
                       <div class="options w-100 d-flex">
                         <div class="temp-hp"><label for="temp-hp">temp</label></div>
                         <div class="d-flex pt-1 pb-1" style="text-align: center;">
-                          <input class="ml-1 mr-1" type="text" name="data.health.temp.value" value="{{data.health.temp.value}}" data-dtype="Number">
+                          <input class="ml-1 mr-1" type="text" name="data.tempHp.value" value="{{data.tempHp.value}}" data-dtype="Number">
                           <span style="font-size: 20px;"> / </span>
-                          <input class="ml-1" type="text" name="data.health.temp.max" value="{{data.health.temp.max}}" data-dtype="Number">
+                          <input class="ml-1" type="text" name="data.tempHp.max" value="{{data.tempHp.max}}" data-dtype="Number">
                         </div>
                       </div>
                       <div class="options w-100 pb-1 pt-1">
@@ -1123,6 +1123,28 @@
                         </div>
                       </div>
                     </div>
+                    <!-- Save Checks -->
+                    <div class="swsh-box d-flex flex-column mt-1 mb-1" style="text-align: center; word-break: keep-all;">
+                      <div class="swsh-header" >
+                        <div class="d-flex w-100 mt-1 mb-1 align-items-center">
+                          <div class="col-sm-12">
+                            <label for="data.modifiers.saveChecks">Save Checks Modifier</label>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="swsh-body d-flex flex-column h-100" style="display: block;">
+                        <div class="d-flex w-100 mt-1 mb-1">
+                          <div class="col-sm-12">
+                            <input name="data.modifiers.saveChecks" type="text" value="{{data.modifiers.saveChecks}}" data-dtype="Number" />
+                          </div>
+                        </div>
+                        <div class="d-flex w-100 mt-1 mb-1">
+                          <div class="col-sm-12">
+                            <button class="btn rollable save">Make Save</button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -1323,22 +1345,29 @@
                   </div>
                   <div class="swsh-header pt-1">
                     <div class="d-flex w-100 mt-1 mb-1">
-                      <div class="col-sm-6">
+                      <div class="col-sm-4">
                         <label for="data.modifiers.acBonus">Accuracy Bonus</label>
                       </div>
-                      <div class="col-sm-6">
+                      <div class="col-sm-4 fs-10">
                         <label for="data.modifiers.critRange">Crit Range Bonus</label>
+                      </div>
+                      <div class="col-sm-4 fs-10">
+                        <label for="data.modifiers.effectRange">Effect Range Bonus</label>
                       </div>
                     </div>
                   </div>
                   <div class="swsh-body">
                     <div class="d-flex w-100 mt-1 mb-1">
-                      <div class="col-sm-6">
+                      <div class="col-sm-4">
                         <input type="text" name="data.modifiers.acBonus" value="{{data.modifiers.acBonus}}"
                           data-dtype="Number" />
                       </div>
-                      <div class="col-sm-6">
+                      <div class="col-sm-4">
                         <input type="text" name="data.modifiers.critRange" value="{{data.modifiers.critRange}}"
+                          data-dtype="Number" />
+                      </div>
+                      <div class="col-sm-4">
+                        <input type="text" name="data.modifiers.effectRange" value="{{data.modifiers.effectRange}}"
                           data-dtype="Number" />
                       </div>
                     </div>
@@ -1596,6 +1625,11 @@
               </div>
             </div>
           </div>
+
+          <!-- Effects Tab -->
+          <div class="tab details effects" data-group="primary" data-tab="effects">
+            {{> "active-effects"}}
+          </div>
         </div>
       </div>
     </div>
@@ -1610,6 +1644,7 @@
         <li><button class="item" data-tab="moves">Moves</button></li>
         <li><button class="item" data-tab="extra">Extra</button></li>
         <li><button class="item" data-tab="dex">Dex</button></li>
+        {{#if (is true (getGameSetting "showDebugInfo"))}}<li><button class="item" data-tab="effects">Effects</button></li>{{/if}}
       </ul>
     </div>
   </div>

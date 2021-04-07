@@ -13,6 +13,12 @@
             "physical" : 0,
             "special" : 0,
             "speed" : 0
+          },
+          "saveChecks": 0,
+          "effectRange": 0,
+          "flinch_count": {
+            "value": 0,
+            "keys": []
           }
         }
       },
@@ -175,7 +181,11 @@
       },
       "shared": {
         "digestionBuff": "",
-        "notes": ""
+        "notes": "",
+        "tempHp": {
+          "value": null,
+          "max": null
+        }
       }
     },
     "character": {
@@ -258,8 +268,28 @@
         }
       },
 
-      "owner": "",
-      "shiny": false
+      "owner": "0",
+      "shiny": false,
+      "loyalty": 3,
+
+      "training": {
+        "agility": {
+          "trained": false,
+          "ordered": false
+        },
+        "brutal": {
+          "trained": false,
+          "ordered": false
+        },
+        "focused": {
+          "trained": false,
+          "ordered": false
+        },
+        "inspired": {
+          "trained": false,
+          "ordered": false
+        }
+      }
     }
   },
   "Item": {

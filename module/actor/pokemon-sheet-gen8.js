@@ -58,6 +58,15 @@ export class PTUGen8PokemonSheet extends ActorSheet {
 				if(level >= 3) findActors(key);
 			}
 		}
+		if(data['owners'].length == 0) {
+			data['owners'] = data['owners'].concat(game.actors.filter(x => !x.hasPlayerOwner && x.data.type == "character"));
+			data['canBeWild'] = true;
+		}
+
+		if(!data['owners'].includes(this.actor.data.data.owner)) {
+			if(this.isEditable)
+				this.actor.update({"data.owner": data['canBeWild'] ? "0" : data['owners'][0]?._id})
+		}
 
 		return data;
 	}
@@ -176,6 +185,7 @@ export class PTUGen8PokemonSheet extends ActorSheet {
 		// Rollable abilities.
 		html.find('.rollable.skill').click(this._onRoll.bind(this));
 		html.find('.rollable.gen8move').click(this._onMoveRoll.bind(this));
+		html.find('.rollable.save').click(this._onSaveRoll.bind(this));
 
 		// Drag events for macros.
 		if (this.actor.owner) {
@@ -233,6 +243,8 @@ export class PTUGen8PokemonSheet extends ActorSheet {
 		const dataset = element.dataset;
 
 		if (dataset.roll) {
+			let mod = (this.actor.data.data.training?.focused?.trained ? this.actor.data.data.training?.critical ? 6 : 2 : 0) + (this.actor.data.data.training?.focused?.ordered ? 2 : 0);
+			if(mod > 0) dataset.roll += `+${mod}`;
 			let roll = new Roll(dataset.roll, this.actor.data.data);
 			let label = dataset.label ? `Rolling ${dataset.label}` : '';
 			roll = roll.roll()
@@ -258,6 +270,26 @@ export class PTUGen8PokemonSheet extends ActorSheet {
 	}
 
 	/**
+	 * Handle clickable rolls.
+	 * @param {Event} event   The originating click event
+	 * @private
+	 */
+	_onSaveRoll(event) {
+		event.preventDefault();
+		if(event.screenX == 0 && event.screenY == 0) return;
+
+		let mod = (this.actor.data.data.training?.inspired?.trained ? this.actor.data.data.training?.critical ? 6 : 2 : 0) + (this.actor.data.data.training?.inspired?.ordered ? 2 : 0) + this.actor.data.data.modifiers.saveChecks;
+		let roll = new Roll("1d20 + @mod", {mod: mod});
+		let label = 'Rolling Save Check';
+		roll.roll().toMessage({
+			speaker: ChatMessage.getSpeaker({
+				actor: this.actor
+			}),
+			flavor: label
+		});
+	}
+
+	/**
 	 * Handle clickable move rolls.
 	 * @param {Event} event   The originating click event
 	 * @private
@@ -271,10 +303,10 @@ export class PTUGen8PokemonSheet extends ActorSheet {
 
 		/** Option Callbacks */
 		let PerformFullAttack = () => {
-			let acRoll = CalculateAcRoll(move.data, this.actor.data.data);
+			let acRoll = CalculateAcRoll(move.data, this.actor.data);
 			let diceResult = GetDiceResult(acRoll)
 
-			let crit = diceResult === 1 ? CritOptions.CRIT_MISS : diceResult >= 20 - this.actor.data.data.modifiers.critRange ? CritOptions.CRIT_HIT : CritOptions.NORMAL;
+			let crit = diceResult === 1 ? CritOptions.CRIT_MISS : (diceResult >= 20 - this.actor.data.data.modifiers.critRange - (this.actor.data.data.training?.brutal?.trained ? this.actor.data.data.training?.critical ? 3 : 1 : 0) - (this.actor.data.data.training?.brutal?.ordered ? 1 : 0)) ? CritOptions.CRIT_HIT : CritOptions.NORMAL;
 
 			let damageRoll, critRoll;
 			if(crit != CritOptions.CRIT_MISS) {
@@ -408,10 +440,11 @@ export class PTUGen8PokemonSheet extends ActorSheet {
 
 /** Pure Functions */
 
-function CalculateAcRoll(moveData, actorData) {
+function CalculateAcRoll(moveData, actor) {
 	return new Roll('1d20-@ac+@acBonus', {
 		ac: (parseInt(moveData.ac) || 0),
-		acBonus: (parseInt(actorData.modifiers.acBonus) || 0)
+		acBonus: (actor.flags?.ptu?.is_blind ? actor.flags?.ptu?.is_totally_blind ? -10 : -6 : 0) + 
+		(parseInt(actor.data.modifiers.acBonus) || 0) + (actor.data.training?.focused?.trained ? actor.data.training?.critical ? 3 : 1 : 0) + (actor.data.training?.focused?.ordered ? 1 : 0)
 	})
 }
 

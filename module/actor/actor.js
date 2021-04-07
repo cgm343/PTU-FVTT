@@ -2,7 +2,7 @@ import { CalcLevel } from "./calculations/level-up-calculator.js";
 import { CalculateEvasions } from "./calculations/evasion-calculator.js";
 import { CalculatePokemonCapabilities, CalculateTrainerCapabilities} from "./calculations/capability-calculator.js"; 
 import { CalculateSkills } from "./calculations/skills-calculator.js"; 
-import { CalcBaseStat, CalculateStatTotal } from "./calculations/stats-calculator.js";
+import { CalcBaseStat, CalculateStatTotal, CalculatePoisonedCondition } from "./calculations/stats-calculator.js";
 import { GetMonEffectiveness } from "./calculations/effectiveness-calculator.js";
 import { warn, debug, log } from '../ptu.js' 
 
@@ -27,20 +27,52 @@ export class PTUActor extends Actor {
       if (actorData.type === 'character') this._prepareCharacterData(actorData);
       if (actorData.type === 'pokemon') this._preparePokemonData(actorData);
     }
+
+    this.applyActiveEffects(false);
+  }
+
+  /**
+   * Apply any transformations to the Actor data which are caused by ActiveEffects.
+   */
+  /** @override */
+  applyActiveEffects(doBaseData = true) {
+    const overrides = {};
+    // Organize non-disabled effects by their application priority
+    const changes = this.effects.reduce((changes, e) => {
+      if (e.data.disabled) return changes;
+      return changes.concat(
+        e.data.changes.map((c) => {
+          c = duplicate(c);
+          if(doBaseData && c.priority >= 51) return undefined;
+          if(!doBaseData && c.priority <= 50) return undefined;
+          c.effect = e;
+          c.priority = c.priority ?? c.mode * 10;
+          return c;
+        }).filter(x => x!=undefined)
+      );
+    }, []);
+    changes.sort((a, b) => a.priority - b.priority);
+    // Apply all changes
+    for (let change of changes) {
+      const result = change.effect.apply(this, change);
+      if (result !== null) overrides[change.key] = result;
+    }
+    // Expand the set of final overrides
+    this.overrides = expandObject(overrides);
   }
 
   /** @override */
   async modifyTokenAttribute(attribute, value, isDelta=false, isBar=true) {
     debug("Modifying Token Attribute",attribute, value, isDelta, isBar);
     
-    const current = getProperty(this.data.data, attribute);
+    const current = duplicate(getProperty(this.data.data, attribute));
     if (isBar) {
       if(attribute == "health") {
-        const temp = duplicate(current.temp);
+        const temp = duplicate(getProperty(this.data.data, "tempHp"));
         if (isDelta) {
           if(value < 0 && Number(temp.value) > 0) {
             temp.value = Number(temp.value) + value;
-            if(temp.value >= 0) return this.update({[`data.${attribute}.temp.value`]: temp.value});
+            if(temp.value >= 0) return this.update({[`data.tempHp.value`]: temp.value});
 
             let totalValue = Number(current.value) + temp.value;
             value = Math.clamped(totalValue, Math.min(-50, current.max*-2), current.max);
@@ -49,7 +81,6 @@ export class PTUActor extends Actor {
           }
           else {
             let totalValue = Number(current.value) + value;
-            debug(totalValue, Math.min(-50, current.max*-2), current.max);
             value = Math.clamped(totalValue, Math.min(-50, current.max*-2), current.max);
             if(totalValue > value) {
               temp.value = totalValue - value;
@@ -64,13 +95,14 @@ export class PTUActor extends Actor {
           }
         }
         debug("Updating Character HP with args:", this, {oldValue: current.value, newValue: value, tempHp: temp })
-        return this.update({[`data.${attribute}.value`]: value, [`data.${attribute}.temp.value`]: temp.value, [`data.${attribute}.temp.max`]: temp.max});
+        return this.update({[`data.${attribute}.value`]: value, [`data.tempHp.value`]: temp.value, [`data.tempHp.max`]: temp.max});
       }
       else {
         if (isDelta) {
           let totalValue = Number(current.value) + value;
           value = Math.clamped(0, totalValue, current.max);
         }
+        if(attribute == "tempHp") return this.update({[`data.${attribute}.value`]: value, [`data.${attribute}.max`]: value});
         return this.update({[`data.${attribute}.value`]: value});
       }
     } else {
@@ -147,6 +179,7 @@ export class PTUActor extends Actor {
     }
 
     data.levelUpPoints = data.level.current + data.modifiers.statPoints + 9;
+    data.stats = CalculatePoisonedCondition(duplicate(data.stats), actorData.flags?.ptu);
     var result = CalculateStatTotal(data.levelUpPoints, data.stats, actorData.items.find(x => x.name.toLowerCase().replace("[playtest]") == "twisted power") != null);
     data.stats = result.stats;
     data.levelUpPoints = result.levelUpPoints;
@@ -156,12 +189,17 @@ export class PTUActor extends Actor {
 
     data.health.percent = Math.round((data.health.value / data.health.max) * 100);
 
-    data.evasion = CalculateEvasions(data);
-    data.capabilities = CalculateTrainerCapabilities(data.skills, actorData.items, data.stats.spd.stage);
+    data.evasion = CalculateEvasions(data, actorData.flags?.ptu);
+    data.capabilities = CalculateTrainerCapabilities(data.skills, actorData.items, data.stats.spd.stage, actorData.flags?.ptu);
 
     data.ap.total = 5 + Math.floor(data.level.current / 5);
 
     data.initiative = {value: data.stats.spd.total + data.modifiers.initiative};
+    if(actorData.flags?.ptu?.is_paralyzed) data.initiative.value = Math.floor(data.initiative.value * 0.5);
+    if(data.modifiers.flinch_count?.value > 0) { 
+      data.initiative.value -= (data.modifiers.flinch_count.value * 5);
+    }
+    Hooks.call("updateInitiative", this);
   }
 
   /**
@@ -183,6 +221,8 @@ export class PTUActor extends Actor {
     data.level.percent = Math.round(((data.level.exp - game.ptu.levelProgression[data.level.current]) / (data.level.expTillNextLevel - game.ptu.levelProgression[data.level.current])) * 100);
 
     // Stats
+    data.stats = CalculatePoisonedCondition(duplicate(data.stats), actorData.flags?.ptu);
+
     data.stats.hp.value = CalcBaseStat(speciesData, data.nature.value, "HP");
     data.stats.atk.value = CalcBaseStat(speciesData, data.nature.value, "Attack");
     data.stats.def.value = CalcBaseStat(speciesData, data.nature.value, "Defense");
@@ -202,15 +242,20 @@ export class PTUActor extends Actor {
 
     data.health.percent = Math.round((data.health.value / data.health.max) * 100);
 
-    data.initiative = {value: data.stats.spd.total + data.modifiers.initiative};
+    data.initiative = {value: data.stats.spd.total + data.modifiers.initiative + (data.training?.agility?.trained ? data.training?.critical ? 12 : 4 : 0) + (data.training?.agility?.ordered ? 4 : 0)};
+    if(actorData.flags?.ptu?.is_paralyzed) data.initiative.value = Math.floor(data.initiative.value * 0.5);
+    if(data.modifiers.flinch_count?.value > 0) { 
+      data.initiative.value -= (data.modifiers.flinch_count.value * 5);
+    }
+    Hooks.call("updateInitiative", this);
 
     data.tp.max = (data.level.current > 0 ? Math.floor(data.level.current / 5) : 0) + 1;
     data.tp.pep.value = actorData.items.filter(x => x.type == "pokeedge" && x.data.origin.toLowerCase() != "pusher").length;
     data.tp.pep.max = data.level.current > 0 ? Math.floor(data.level.current / 10)+1 : 1;
 
-    data.evasion = CalculateEvasions(data);
+    data.evasion = CalculateEvasions(data, actorData.flags?.ptu);
 
-    data.capabilities = CalculatePokemonCapabilities(speciesData, actorData.items.values(), data.stats.spd.stage);
+    data.capabilities = CalculatePokemonCapabilities(speciesData, actorData.items.values(), data.stats.spd.stage, data.training, actorData.flags?.ptu);
 
     if(speciesData) data.egggroup = speciesData["Breeding Information"]["Egg Group"].join(" & ");
 
