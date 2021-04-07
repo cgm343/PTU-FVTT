@@ -90,7 +90,7 @@
   "url": "https://github.com/cgm343/PTU-FVTT",
   "manifest": "https://github.com/cgm343/PTU-FVTT/raw/master/system.json",
   "changelog": "https://github.com/cgm343/PTU-FVTT/raw/master/changelog.md",
-  "download": "https://github.com/cgm343/PTU-FVTT/archive/system.zip",
+  "download": "https://github.com/cgm343/PTU-FVTT/archive/master.zip",
   "initiative": "",
   "license": "LICENSE.txt"
 }
