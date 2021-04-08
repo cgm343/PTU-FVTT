@@ -764,22 +764,6 @@ class DirectoryPicker extends FilePicker {
   }
 }
 
-// Automatically update Initiative if Speed / Init Mod changes
-Hooks.on("updateInitiative", function(actor) {
-  if(!game.combats?.active) return;
-
-  let c = game.combats.active.combatants.find(x => x.actor?._id == actor._id)
-  if(!c) return;
-  console.log(c);
-  let init = actor.data.data.initiative.value;
-  let tieBreaker = Number((c.initiative+"").split(".")[1]) * 0.01;
-  if(init+tieBreaker != c.initiative) {
-    game.combats.active.setInitiative(c._id, init >= 0 ? init+tieBreaker : (Math.abs(init)+tieBreaker)*-1);
-  }
-
-  return true;
-})
-
 // this s hooked in, we don't use all the data, so lets stop eslint complaining
 // eslint-disable-next-line no-unused-vars
 Hooks.on("renderSettingsConfig", (app, html, user) => {
